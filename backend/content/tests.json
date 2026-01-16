@@ -1,0 +1,28 @@
+{
+  "tests": [
+    {
+      "name": "Get news list",
+      "method": "GET",
+      "path": "/?type=news",
+      "expectedStatus": 200,
+      "expectedBody": [],
+      "bodyMatcher": "partial"
+    },
+    {
+      "name": "Get achievements list",
+      "method": "GET",
+      "path": "/?type=achievements",
+      "expectedStatus": 200,
+      "expectedBody": [],
+      "bodyMatcher": "partial"
+    },
+    {
+      "name": "Get gallery list",
+      "method": "GET",
+      "path": "/?type=gallery",
+      "expectedStatus": 200,
+      "expectedBody": [],
+      "bodyMatcher": "partial"
+    }
+  ]
+}

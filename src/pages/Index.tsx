@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -7,8 +7,13 @@ import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import Icon from '@/components/ui/icon';
 
+const API_URL = 'https://functions.poehali.dev/4718630c-6af3-4ca4-851c-1ea12eebe66e';
+
 export default function Index() {
   const [activeSection, setActiveSection] = useState('home');
+  const [news, setNews] = useState([]);
+  const [achievements, setAchievements] = useState([]);
+  const [gallery, setGallery] = useState([]);
 
   const scrollToSection = (sectionId: string) => {
     setActiveSection(sectionId);
@@ -25,24 +30,29 @@ export default function Index() {
     { title: 'Special Weapons And Tactical (SWAT)', icon: 'Shield', description: 'Элитное подразделение для проведения специальных операций' }
   ];
 
-  const news = [
-    { id: 1, title: 'Успешная операция по задержанию преступной группировки', date: '15.01.2026', category: 'Операция' },
-    { id: 2, title: 'Новый набор в полицейскую академию', date: '12.01.2026', category: 'Академия' },
-    { id: 3, title: 'Награждение лучших офицеров месяца', date: '10.01.2026', category: 'Награды' },
-    { id: 4, title: 'Модернизация патрульных автомобилей', date: '08.01.2026', category: 'Обновление' }
-  ];
+  useEffect(() => {
+    const fetchContent = async () => {
+      try {
+        const [newsRes, achievementsRes, galleryRes] = await Promise.all([
+          fetch(`${API_URL}?type=news`),
+          fetch(`${API_URL}?type=achievements`),
+          fetch(`${API_URL}?type=gallery`)
+        ]);
 
-  const achievements = [
-    { title: 'Лучший офицер года', recipient: 'Officer John Smith', date: '2025' },
-    { title: 'Героизм при исполнении', recipient: 'Sergeant Mike Johnson', date: '2025' },
-    { title: 'За верность службе', recipient: 'Captain Sarah Williams', date: '2025' }
-  ];
+        const newsData = await newsRes.json();
+        const achievementsData = await achievementsRes.json();
+        const galleryData = await galleryRes.json();
 
-  const galleryImages = [
-    'https://cdn.poehali.dev/projects/a03580d5-a1fd-4d9b-8638-987ce140bdec/files/f4d040e0-ea4d-4130-bc44-85c1cd77d927.jpg',
-    'https://cdn.poehali.dev/projects/a03580d5-a1fd-4d9b-8638-987ce140bdec/files/a82c9030-4caf-42d6-8654-3b4683e01582.jpg',
-    'https://cdn.poehali.dev/projects/a03580d5-a1fd-4d9b-8638-987ce140bdec/files/f89aaace-dea7-4916-a3f0-83dacd0a5aaf.jpg'
-  ];
+        setNews(newsData);
+        setAchievements(achievementsData);
+        setGallery(galleryData);
+      } catch (error) {
+        console.error('Error fetching content:', error);
+      }
+    };
+
+    fetchContent();
+  }, []);
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-slate-900 to-slate-800">
@@ -322,19 +332,23 @@ export default function Index() {
           <h2 className="text-4xl font-heading font-bold text-primary mb-12 text-center">
             Последние Новости
           </h2>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 max-w-4xl mx-auto">
-            {news.map((item) => (
-              <Card key={item.id} className="hover:shadow-lg transition-shadow">
-                <CardHeader>
-                  <div className="flex items-center justify-between mb-2">
-                    <Badge variant="outline">{item.category}</Badge>
-                    <span className="text-sm text-muted-foreground">{item.date}</span>
-                  </div>
-                  <CardTitle className="font-heading text-lg">{item.title}</CardTitle>
-                </CardHeader>
-              </Card>
-            ))}
-          </div>
+          {news.length === 0 ? (
+            <p className="text-center text-muted-foreground py-8">Новостей пока нет</p>
+          ) : (
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 max-w-4xl mx-auto">
+              {news.map((item: any) => (
+                <Card key={item.id} className="hover:shadow-lg transition-shadow">
+                  <CardHeader>
+                    <div className="flex items-center justify-between mb-2">
+                      <Badge variant="outline">{item.category}</Badge>
+                      <span className="text-sm text-muted-foreground">{new Date(item.date).toLocaleDateString('ru-RU')}</span>
+                    </div>
+                    <CardTitle className="font-heading text-lg">{item.title}</CardTitle>
+                  </CardHeader>
+                </Card>
+              ))}
+            </div>
+          )}
         </div>
       </section>
 
@@ -343,18 +357,22 @@ export default function Index() {
           <h2 className="text-4xl font-heading font-bold text-primary mb-12 text-center">
             Награды и Достижения
           </h2>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-4xl mx-auto">
-            {achievements.map((achievement, index) => (
-              <Card key={index} className="border-secondary hover:shadow-xl transition-all">
-                <CardHeader className="text-center">
-                  <Icon name="Medal" className="mx-auto mb-4 text-secondary" size={48} />
-                  <CardTitle className="font-heading text-lg">{achievement.title}</CardTitle>
-                  <CardDescription>{achievement.recipient}</CardDescription>
-                  <Badge variant="secondary" className="mt-2">{achievement.date}</Badge>
-                </CardHeader>
-              </Card>
-            ))}
-          </div>
+          {achievements.length === 0 ? (
+            <p className="text-center text-muted-foreground py-8">Наград пока нет</p>
+          ) : (
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-4xl mx-auto">
+              {achievements.map((achievement: any) => (
+                <Card key={achievement.id} className="border-secondary hover:shadow-xl transition-all">
+                  <CardHeader className="text-center">
+                    <Icon name="Medal" className="mx-auto mb-4 text-secondary" size={48} />
+                    <CardTitle className="font-heading text-lg">{achievement.title}</CardTitle>
+                    <CardDescription>{achievement.recipient}</CardDescription>
+                    <Badge variant="secondary" className="mt-2">{achievement.date}</Badge>
+                  </CardHeader>
+                </Card>
+              ))}
+            </div>
+          )}
         </div>
       </section>
 
@@ -363,20 +381,24 @@ export default function Index() {
           <h2 className="text-4xl font-heading font-bold text-primary mb-12 text-center">
             Галерея
           </h2>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            {galleryImages.map((image, index) => (
-              <div key={index} className="relative h-64 rounded-lg overflow-hidden group cursor-pointer">
-                <img
-                  src={image}
-                  alt={`Gallery ${index + 1}`}
-                  className="w-full h-full object-cover transition-transform group-hover:scale-110"
-                />
-                <div className="absolute inset-0 bg-primary/50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
-                  <Icon name="ZoomIn" className="text-white" size={32} />
+          {gallery.length === 0 ? (
+            <p className="text-center text-muted-foreground py-8">Изображений пока нет</p>
+          ) : (
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+              {gallery.map((item: any) => (
+                <div key={item.id} className="relative h-64 rounded-lg overflow-hidden group cursor-pointer">
+                  <img
+                    src={item.image_url}
+                    alt={item.caption || 'Gallery image'}
+                    className="w-full h-full object-cover transition-transform group-hover:scale-110"
+                  />
+                  <div className="absolute inset-0 bg-primary/50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+                    <Icon name="ZoomIn" className="text-white" size={32} />
+                  </div>
                 </div>
-              </div>
-            ))}
-          </div>
+              ))}
+            </div>
+          )}
         </div>
       </section>
 
