@@ -168,51 +168,22 @@ export default function Index() {
           <h2 className="text-4xl font-heading font-bold text-primary mb-8 text-center">
             О Департаменте
           </h2>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-12">
-            <div className="space-y-6">
-              <div>
-                <h3 className="text-2xl font-heading font-semibold text-primary mb-4">Наша Миссия</h3>
-                <p className="text-muted-foreground leading-relaxed">
-                  Los Santos Police Department — это элитное подразделение на сервере Majestic RP, 
-                  посвященное поддержанию порядка и защите граждан города. Мы стремимся создать 
-                  безопасную среду для всех жителей и обеспечить справедливость.
-                </p>
-              </div>
-              <div>
-                <h3 className="text-2xl font-heading font-semibold text-primary mb-4">История</h3>
-                <p className="text-muted-foreground leading-relaxed">
-                  Основанный в начале существования сервера, LSPD стал одной из самых уважаемых 
-                  организаций. За годы службы наши офицеры провели тысячи операций и спасли 
-                  бесчисленное количество жизней.
-                </p>
-              </div>
+          <div className="max-w-4xl mx-auto space-y-6">
+            <div>
+              <h3 className="text-2xl font-heading font-semibold text-primary mb-4">Наша Миссия</h3>
+              <p className="text-muted-foreground leading-relaxed">
+                Los Santos Police Department — это элитное подразделение на сервере Majestic RP, 
+                посвященное поддержанию порядка и защите граждан города. Мы стремимся создать 
+                безопасную среду для всех жителей и обеспечить справедливость.
+              </p>
             </div>
-            <div className="space-y-6">
-              <div>
-                <h3 className="text-2xl font-heading font-semibold text-primary mb-4">Структура</h3>
-                <ul className="space-y-3">
-                  <li className="flex items-start">
-                    <Icon name="CheckCircle" className="text-secondary mr-2 mt-1" size={20} />
-                    <span className="text-muted-foreground">Патрульная служба</span>
-                  </li>
-                  <li className="flex items-start">
-                    <Icon name="CheckCircle" className="text-secondary mr-2 mt-1" size={20} />
-                    <span className="text-muted-foreground">Отдел расследований</span>
-                  </li>
-                  <li className="flex items-start">
-                    <Icon name="CheckCircle" className="text-secondary mr-2 mt-1" size={20} />
-                    <span className="text-muted-foreground">Спецподразделение SWAT</span>
-                  </li>
-                  <li className="flex items-start">
-                    <Icon name="CheckCircle" className="text-secondary mr-2 mt-1" size={20} />
-                    <span className="text-muted-foreground">Дорожная полиция</span>
-                  </li>
-                  <li className="flex items-start">
-                    <Icon name="CheckCircle" className="text-secondary mr-2 mt-1" size={20} />
-                    <span className="text-muted-foreground">Полицейская академия</span>
-                  </li>
-                </ul>
-              </div>
+            <div>
+              <h3 className="text-2xl font-heading font-semibold text-primary mb-4">История</h3>
+              <p className="text-muted-foreground leading-relaxed">
+                Основанный в начале существования сервера, LSPD стал одной из самых уважаемых 
+                организаций. За годы службы наши офицеры провели тысячи операций и спасли 
+                бесчисленное количество жизней.
+              </p>
             </div>
           </div>
         </div>
