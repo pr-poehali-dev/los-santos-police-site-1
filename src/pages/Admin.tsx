@@ -18,6 +18,12 @@ export default function Admin() {
   const [achievements, setAchievements] = useState([]);
   const [gallery, setGallery] = useState([]);
   const [registrations, setRegistrations] = useState([]);
+  const [settings, setSettings] = useState({
+    hero_title: '',
+    hero_subtitle: '',
+    about_mission: '',
+    about_history: ''
+  });
 
   const [newsForm, setNewsForm] = useState({ title: '', category: '', date: '' });
   const [achievementForm, setAchievementForm] = useState({ title: '', recipient: '', date: '' });
@@ -30,21 +36,41 @@ export default function Admin() {
 
   const fetchContent = async () => {
     try {
-      const [newsRes, achievementsRes, galleryRes] = await Promise.all([
+      const [newsRes, achievementsRes, galleryRes, settingsRes] = await Promise.all([
         fetch(`${API_URL}?type=news`),
         fetch(`${API_URL}?type=achievements`),
-        fetch(`${API_URL}?type=gallery`)
+        fetch(`${API_URL}?type=gallery`),
+        fetch(`${API_URL}?type=settings`)
       ]);
 
       setNews(await newsRes.json());
       setAchievements(await achievementsRes.json());
       setGallery(await galleryRes.json());
+      setSettings(await settingsRes.json());
     } catch (error) {
       toast({
         title: 'Ошибка',
         description: 'Не удалось загрузить данные',
         variant: 'destructive'
       });
+    }
+  };
+
+  const updateSettings = async () => {
+    try {
+      const response = await fetch(`${API_URL}?type=settings`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(settings)
+      });
+
+      if (response.ok) {
+        toast({ title: 'Успех', description: 'Настройки сайта обновлены' });
+      } else {
+        toast({ title: 'Ошибка', description: 'Не удалось обновить настройки', variant: 'destructive' });
+      }
+    } catch (error) {
+      toast({ title: 'Ошибка', description: 'Проблема с подключением', variant: 'destructive' });
     }
   };
 
@@ -144,13 +170,62 @@ export default function Admin() {
           </Button>
         </div>
 
-        <Tabs defaultValue="registrations">
-          <TabsList className="grid w-full grid-cols-4">
+        <Tabs defaultValue="settings">
+          <TabsList className="grid w-full grid-cols-5">
+            <TabsTrigger value="settings">Настройки</TabsTrigger>
             <TabsTrigger value="registrations">Регистрации</TabsTrigger>
             <TabsTrigger value="news">Новости</TabsTrigger>
             <TabsTrigger value="achievements">Награды</TabsTrigger>
             <TabsTrigger value="gallery">Галерея</TabsTrigger>
           </TabsList>
+
+          <TabsContent value="settings" className="space-y-6">
+            <Card>
+              <CardHeader>
+                <CardTitle>Основные настройки сайта</CardTitle>
+                <CardDescription>Измените тексты на главной странице</CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div>
+                  <label className="text-sm font-medium mb-2 block">Заголовок главной страницы</label>
+                  <Input
+                    value={settings.hero_title}
+                    onChange={(e) => setSettings({ ...settings, hero_title: e.target.value })}
+                    placeholder="Los Santos Police Department"
+                  />
+                </div>
+                <div>
+                  <label className="text-sm font-medium mb-2 block">Подзаголовок главной страницы</label>
+                  <Input
+                    value={settings.hero_subtitle}
+                    onChange={(e) => setSettings({ ...settings, hero_subtitle: e.target.value })}
+                    placeholder="Защищая и служа городу"
+                  />
+                </div>
+                <div>
+                  <label className="text-sm font-medium mb-2 block">Наша Миссия</label>
+                  <Textarea
+                    value={settings.about_mission}
+                    onChange={(e) => setSettings({ ...settings, about_mission: e.target.value })}
+                    placeholder="Описание миссии департамента"
+                    rows={4}
+                  />
+                </div>
+                <div>
+                  <label className="text-sm font-medium mb-2 block">История</label>
+                  <Textarea
+                    value={settings.about_history}
+                    onChange={(e) => setSettings({ ...settings, about_history: e.target.value })}
+                    placeholder="История департамента"
+                    rows={4}
+                  />
+                </div>
+                <Button onClick={updateSettings} className="w-full">
+                  Сохранить изменения
+                </Button>
+              </CardContent>
+            </Card>
+          </TabsContent>
 
           <TabsContent value="registrations" className="space-y-6">
             <Card>

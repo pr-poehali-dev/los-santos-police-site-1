@@ -17,6 +17,12 @@ export default function Index() {
   const [news, setNews] = useState([]);
   const [achievements, setAchievements] = useState([]);
   const [gallery, setGallery] = useState([]);
+  const [settings, setSettings] = useState({
+    hero_title: 'Los Santos Police Department',
+    hero_subtitle: 'Защищая и служа городу',
+    about_mission: '',
+    about_history: ''
+  });
   const [registrationForm, setRegistrationForm] = useState({
     first_name: '',
     last_name: '',
@@ -41,19 +47,22 @@ export default function Index() {
   useEffect(() => {
     const fetchContent = async () => {
       try {
-        const [newsRes, achievementsRes, galleryRes] = await Promise.all([
+        const [newsRes, achievementsRes, galleryRes, settingsRes] = await Promise.all([
           fetch(`${API_URL}?type=news`),
           fetch(`${API_URL}?type=achievements`),
-          fetch(`${API_URL}?type=gallery`)
+          fetch(`${API_URL}?type=gallery`),
+          fetch(`${API_URL}?type=settings`)
         ]);
 
         const newsData = await newsRes.json();
         const achievementsData = await achievementsRes.json();
         const galleryData = await galleryRes.json();
+        const settingsData = await settingsRes.json();
 
         setNews(newsData);
         setAchievements(achievementsData);
         setGallery(galleryData);
+        setSettings(settingsData);
       } catch (error) {
         console.error('Error fetching content:', error);
       }
@@ -91,7 +100,7 @@ export default function Index() {
                 </button>
               ))}
             </div>
-            <Button variant="secondary" className="hidden md:flex">
+            <Button variant="secondary" className="hidden md:flex" onClick={() => scrollToSection('contacts')}>
               Подать заявку
             </Button>
           </div>
@@ -109,16 +118,16 @@ export default function Index() {
             <div className="absolute inset-0 bg-gradient-to-r from-primary/90 to-primary/40 flex items-center">
               <div className="container mx-auto px-8">
                 <h1 className="text-6xl md:text-7xl font-heading font-bold text-white mb-4 animate-fade-in">
-                  Los Santos Police Department
+                  {settings.hero_title}
                 </h1>
                 <p className="text-2xl text-secondary mb-8 animate-fade-in">
-                  Защищая и служа городу
+                  {settings.hero_subtitle}
                 </p>
                 <div className="flex space-x-4">
-                  <Button size="lg" variant="secondary" className="font-medium">
+                  <Button size="lg" variant="secondary" className="font-medium" onClick={() => scrollToSection('contacts')}>
                     Вступить в ряды
                   </Button>
-                  <Button size="lg" variant="outline" className="bg-white/10 text-white border-white hover:bg-white hover:text-primary">
+                  <Button size="lg" variant="outline" className="bg-white/10 text-white border-white hover:bg-white hover:text-primary" onClick={() => scrollToSection('about')}>
                     Узнать больше
                   </Button>
                 </div>
@@ -131,7 +140,7 @@ export default function Index() {
       <section className="py-12 px-4 bg-white">
         <div className="container mx-auto">
           <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
-            <Card className="border-primary hover:shadow-lg transition-shadow">
+            <Card className="border-primary hover:shadow-lg transition-shadow cursor-pointer" onClick={() => window.location.href = '#home'}>
               <CardHeader className="text-center">
                 <Icon name="Newspaper" className="mx-auto mb-2 text-primary" size={40} />
                 <CardTitle className="font-heading">Новости</CardTitle>
@@ -140,7 +149,7 @@ export default function Index() {
                 <p className="text-sm text-muted-foreground text-center">Актуальные события департамента</p>
               </CardContent>
             </Card>
-            <Card className="border-primary hover:shadow-lg transition-shadow">
+            <Card className="border-primary hover:shadow-lg transition-shadow cursor-pointer" onClick={() => window.location.href = '#home'}>
               <CardHeader className="text-center">
                 <Icon name="Trophy" className="mx-auto mb-2 text-secondary" size={40} />
                 <CardTitle className="font-heading">Достижения</CardTitle>
@@ -149,7 +158,7 @@ export default function Index() {
                 <p className="text-sm text-muted-foreground text-center">Награды и успехи офицеров</p>
               </CardContent>
             </Card>
-            <Card className="border-primary hover:shadow-lg transition-shadow">
+            <Card className="border-primary hover:shadow-lg transition-shadow cursor-pointer" onClick={() => scrollToSection('departments')}>
               <CardHeader className="text-center">
                 <Icon name="GraduationCap" className="mx-auto mb-2 text-primary" size={40} />
                 <CardTitle className="font-heading">Академия</CardTitle>
@@ -158,7 +167,7 @@ export default function Index() {
                 <p className="text-sm text-muted-foreground text-center">Обучение и подготовка кадетов</p>
               </CardContent>
             </Card>
-            <Card className="border-primary hover:shadow-lg transition-shadow">
+            <Card className="border-primary hover:shadow-lg transition-shadow cursor-pointer" onClick={() => window.location.href = '#home'}>
               <CardHeader className="text-center">
                 <Icon name="Award" className="mx-auto mb-2 text-secondary" size={40} />
                 <CardTitle className="font-heading">Премии</CardTitle>
@@ -180,17 +189,13 @@ export default function Index() {
             <div>
               <h3 className="text-2xl font-heading font-semibold text-primary mb-4">Наша Миссия</h3>
               <p className="text-muted-foreground leading-relaxed">
-                Los Santos Police Department — это элитное подразделение на сервере Majestic RP, 
-                посвященное поддержанию порядка и защите граждан города. Мы стремимся создать 
-                безопасную среду для всех жителей и обеспечить справедливость.
+                {settings.about_mission}
               </p>
             </div>
             <div>
               <h3 className="text-2xl font-heading font-semibold text-primary mb-4">История</h3>
               <p className="text-muted-foreground leading-relaxed">
-                Основанный в начале существования сервера, LSPD стал одной из самых уважаемых 
-                организаций. За годы службы наши офицеры провели тысячи операций и спасли 
-                бесчисленное количество жизней.
+                {settings.about_history}
               </p>
             </div>
           </div>

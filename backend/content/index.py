@@ -4,7 +4,7 @@ import psycopg2
 from psycopg2.extras import RealDictCursor
 
 def handler(event: dict, context) -> dict:
-    """API для управления новостями, достижениями и галереей"""
+    """API для управления контентом сайта LSPD (новости, достижения, галерея, настройки)"""
     
     method = event.get('httpMethod', 'GET')
     
@@ -30,7 +30,17 @@ def handler(event: dict, context) -> dict:
         cur = conn.cursor(cursor_factory=RealDictCursor)
         
         if method == 'GET':
-            if content_type == 'news':
+            if content_type == 'settings':
+                cur.execute('SELECT * FROM site_settings')
+                results = cur.fetchall()
+                settings = {row['key']: row['value'] for row in results}
+                return {
+                    'statusCode': 200,
+                    'headers': {'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*'},
+                    'body': json.dumps(settings),
+                    'isBase64Encoded': False
+                }
+            elif content_type == 'news':
                 cur.execute('SELECT * FROM news ORDER BY date DESC')
             elif content_type == 'achievements':
                 cur.execute('SELECT * FROM achievements ORDER BY created_at DESC')
@@ -49,6 +59,31 @@ def handler(event: dict, context) -> dict:
                 'statusCode': 200,
                 'headers': {'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*'},
                 'body': json.dumps([dict(row) for row in results], default=str),
+                'isBase64Encoded': False
+            }
+        
+        elif method == 'PUT':
+            body = json.loads(event.get('body', '{}'))
+            
+            if content_type == 'settings':
+                for key, value in body.items():
+                    cur.execute(
+                        "UPDATE site_settings SET value = %s, updated_at = CURRENT_TIMESTAMP WHERE key = %s",
+                        (value, key)
+                    )
+                
+                conn.commit()
+                return {
+                    'statusCode': 200,
+                    'headers': {'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*'},
+                    'body': json.dumps({'message': 'Настройки обновлены'}),
+                    'isBase64Encoded': False
+                }
+            
+            return {
+                'statusCode': 400,
+                'headers': {'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*'},
+                'body': json.dumps({'error': 'Invalid type'}),
                 'isBase64Encoded': False
             }
         
