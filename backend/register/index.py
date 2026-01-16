@@ -104,6 +104,18 @@ def handler(event: dict, context) -> dict:
                     update_fields.append('user_id = %s')
                     update_values.append(user_id)
             
+            if 'position' in body:
+                position = body['position'].strip()
+                if position:
+                    update_fields.append('position = %s')
+                    update_values.append(position)
+            
+            if 'department' in body:
+                department = body['department'].strip()
+                if department:
+                    update_fields.append('department = %s')
+                    update_values.append(department)
+            
             if not update_fields:
                 return {
                     'statusCode': 400,

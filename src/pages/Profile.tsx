@@ -17,7 +17,9 @@ export default function Profile() {
   const [editForm, setEditForm] = useState({
     first_name: '',
     last_name: '',
-    user_id: ''
+    user_id: '',
+    position: '',
+    department: ''
   });
 
   const fetchUserData = async () => {
@@ -30,7 +32,9 @@ export default function Profile() {
         setEditForm({
           first_name: data[0].first_name,
           last_name: data[0].last_name,
-          user_id: data[0].user_id
+          user_id: data[0].user_id,
+          position: data[0].position || 'Кадет',
+          department: data[0].department || 'Police Academy (PA)'
         });
       }
     } catch (error) {
@@ -84,7 +88,9 @@ export default function Profile() {
     setEditForm({
       first_name: userData.first_name,
       last_name: userData.last_name,
-      user_id: userData.user_id
+      user_id: userData.user_id,
+      position: userData.position || 'Кадет',
+      department: userData.department || 'Police Academy (PA)'
     });
     setIsEditing(false);
   };
@@ -266,18 +272,37 @@ export default function Profile() {
                 </CardTitle>
               </CardHeader>
               <CardContent className="space-y-4">
-                <div>
-                  <p className="text-sm text-muted-foreground">Должность</p>
-                  <p className="text-lg font-semibold">
-                    {userData.is_admin ? 'Администратор департамента' : 'Кадет'}
-                  </p>
-                </div>
-                <div>
-                  <p className="text-sm text-muted-foreground">Отдел</p>
-                  <p className="text-lg font-semibold">
-                    {userData.is_admin ? 'Административный' : 'Police Academy (PA)'}
-                  </p>
-                </div>
+                {!isEditing || !userData.is_admin ? (
+                  <>
+                    <div>
+                      <p className="text-sm text-muted-foreground">Должность</p>
+                      <p className="text-lg font-semibold">{userData.position || 'Кадет'}</p>
+                    </div>
+                    <div>
+                      <p className="text-sm text-muted-foreground">Отдел</p>
+                      <p className="text-lg font-semibold">{userData.department || 'Police Academy (PA)'}</p>
+                    </div>
+                  </>
+                ) : (
+                  <>
+                    <div>
+                      <label className="text-sm font-medium mb-2 block">Должность</label>
+                      <Input
+                        value={editForm.position}
+                        onChange={(e) => setEditForm({ ...editForm, position: e.target.value })}
+                        placeholder="Введите должность"
+                      />
+                    </div>
+                    <div>
+                      <label className="text-sm font-medium mb-2 block">Отдел</label>
+                      <Input
+                        value={editForm.department}
+                        onChange={(e) => setEditForm({ ...editForm, department: e.target.value })}
+                        placeholder="Введите отдел"
+                      />
+                    </div>
+                  </>
+                )}
                 <div>
                   <p className="text-sm text-muted-foreground">Уровень доступа</p>
                   <Badge variant={userData.is_admin ? 'default' : 'outline'} className="text-base">
