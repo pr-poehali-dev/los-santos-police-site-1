@@ -1,0 +1,29 @@
+{
+  "tests": [
+    {
+      "name": "Get registrations list",
+      "method": "GET",
+      "path": "/",
+      "expectedStatus": 200,
+      "expectedBody": [],
+      "bodyMatcher": "partial"
+    },
+    {
+      "name": "Create registration",
+      "method": "POST",
+      "path": "/",
+      "body": {
+        "first_name": "Иван",
+        "last_name": "Иванов",
+        "user_id": "12345"
+      },
+      "expectedStatus": 201,
+      "expectedBody": {
+        "first_name": "Иван",
+        "last_name": "Иванов",
+        "user_id": "12345"
+      },
+      "bodyMatcher": "partial"
+    }
+  ]
+}
