@@ -227,10 +227,11 @@ export default function Index() {
             Правила и Устав
           </h2>
           <Tabs defaultValue="general" className="max-w-4xl mx-auto">
-            <TabsList className="grid w-full grid-cols-3">
+            <TabsList className="grid w-full grid-cols-4">
               <TabsTrigger value="general">Общие правила</TabsTrigger>
               <TabsTrigger value="conduct">Поведение</TabsTrigger>
               <TabsTrigger value="operations">Операции</TabsTrigger>
+              <TabsTrigger value="ooc">OOC</TabsTrigger>
             </TabsList>
             <TabsContent value="general" className="space-y-4">
               <Card>
@@ -303,6 +304,31 @@ export default function Index() {
                   <div className="flex items-start">
                     <span className="text-secondary font-bold mr-3">4.</span>
                     <p className="text-muted-foreground">Запрос подкрепления в опасных ситуациях</p>
+                  </div>
+                </CardContent>
+              </Card>
+            </TabsContent>
+            <TabsContent value="ooc" className="space-y-4">
+              <Card>
+                <CardHeader>
+                  <CardTitle className="font-heading">OOC правила</CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-3">
+                  <div className="flex items-start">
+                    <span className="text-secondary font-bold mr-3">1.</span>
+                    <p className="text-muted-foreground">Фриковство строго запрещено на территории департамента и во время службы</p>
+                  </div>
+                  <div className="flex items-start">
+                    <span className="text-secondary font-bold mr-3">2.</span>
+                    <p className="text-muted-foreground">Соблюдайте ролевое отыгрывание в любых ситуациях</p>
+                  </div>
+                  <div className="flex items-start">
+                    <span className="text-secondary font-bold mr-3">3.</span>
+                    <p className="text-muted-foreground">Неадекватное поведение вне игровой роли влечет дисциплинарные меры</p>
+                  </div>
+                  <div className="flex items-start">
+                    <span className="text-secondary font-bold mr-3">4.</span>
+                    <p className="text-muted-foreground">Уважайте других игроков и соблюдайте правила сервера</p>
                   </div>
                 </CardContent>
               </Card>
