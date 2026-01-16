@@ -17,12 +17,12 @@ export default function Index() {
   };
 
   const departments = [
-    { title: 'Патрульная служба', icon: 'Car', description: 'Обеспечение порядка и безопасности на улицах города' },
-    { title: 'Отдел расследований', icon: 'Search', description: 'Раскрытие преступлений и проведение следственных мероприятий' },
-    { title: 'SWAT', icon: 'Shield', description: 'Спецподразделение для проведения тактических операций' },
-    { title: 'Дорожная полиция', icon: 'Construction', description: 'Контроль соблюдения правил дорожного движения' },
-    { title: 'Полицейская академия', icon: 'GraduationCap', description: 'Обучение и подготовка новых офицеров' },
-    { title: 'Отдел внутренних дел', icon: 'FileText', description: 'Контроль соблюдения дисциплины и порядка в департаменте' }
+    { title: 'Police Academy (PA)', icon: 'GraduationCap', description: 'Обучение и подготовка новых кадетов для службы в LSPD' },
+    { title: 'Central Patrol Division (CPD)', icon: 'Car', description: 'Патрулирование улиц и обеспечение общественной безопасности' },
+    { title: 'Police Academy Instructors (PAI)', icon: 'BookOpen', description: 'Опытные инструкторы по подготовке будущих офицеров' },
+    { title: 'Internal Affairs Division (IAD)', icon: 'FileText', description: 'Контроль соблюдения дисциплины и расследование внутренних нарушений' },
+    { title: 'Detective Bureau (DB)', icon: 'Search', description: 'Раскрытие сложных преступлений и проведение детективных расследований' },
+    { title: 'Special Weapons And Tactical (SWAT)', icon: 'Shield', description: 'Элитное подразделение для проведения специальных операций' }
   ];
 
   const news = [
