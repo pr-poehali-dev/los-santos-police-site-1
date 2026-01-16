@@ -35,9 +35,15 @@ export default function NavigationBar({ activeSection, scrollToSection }: Naviga
               </button>
             ))}
           </div>
-          <Button variant="secondary" className="hidden md:flex" onClick={() => scrollToSection('contacts')}>
-            Подать заявку
-          </Button>
+          <div className="flex gap-3">
+            <Button variant="outline" className="hidden md:flex text-white border-white hover:bg-white hover:text-primary" onClick={() => window.location.href = '/profile'}>
+              <Icon name="User" size={20} className="mr-2" />
+              Профиль
+            </Button>
+            <Button variant="secondary" className="hidden md:flex" onClick={() => scrollToSection('contacts')}>
+              Подать заявку
+            </Button>
+          </div>
         </div>
       </div>
     </nav>
