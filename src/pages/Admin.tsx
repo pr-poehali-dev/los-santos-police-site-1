@@ -4,16 +4,20 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Badge } from '@/components/ui/badge';
+import { Switch } from '@/components/ui/switch';
 import Icon from '@/components/ui/icon';
 import { useToast } from '@/hooks/use-toast';
 
 const API_URL = 'https://functions.poehali.dev/4718630c-6af3-4ca4-851c-1ea12eebe66e';
+const REGISTER_API_URL = 'https://functions.poehali.dev/31833d3b-7eea-4b55-a913-2666e686a0ac';
 
 export default function Admin() {
   const { toast } = useToast();
   const [news, setNews] = useState([]);
   const [achievements, setAchievements] = useState([]);
   const [gallery, setGallery] = useState([]);
+  const [registrations, setRegistrations] = useState([]);
 
   const [newsForm, setNewsForm] = useState({ title: '', category: '', date: '' });
   const [achievementForm, setAchievementForm] = useState({ title: '', recipient: '', date: '' });
@@ -21,6 +25,7 @@ export default function Admin() {
 
   useEffect(() => {
     fetchContent();
+    fetchRegistrations();
   }, []);
 
   const fetchContent = async () => {
@@ -38,6 +43,20 @@ export default function Admin() {
       toast({
         title: 'Ошибка',
         description: 'Не удалось загрузить данные',
+        variant: 'destructive'
+      });
+    }
+  };
+
+  const fetchRegistrations = async () => {
+    try {
+      const response = await fetch(REGISTER_API_URL);
+      const data = await response.json();
+      setRegistrations(data);
+    } catch (error) {
+      toast({
+        title: 'Ошибка',
+        description: 'Не удалось загрузить регистрации',
         variant: 'destructive'
       });
     }
@@ -125,12 +144,116 @@ export default function Admin() {
           </Button>
         </div>
 
-        <Tabs defaultValue="news">
-          <TabsList className="grid w-full grid-cols-3">
+        <Tabs defaultValue="registrations">
+          <TabsList className="grid w-full grid-cols-4">
+            <TabsTrigger value="registrations">Регистрации</TabsTrigger>
             <TabsTrigger value="news">Новости</TabsTrigger>
             <TabsTrigger value="achievements">Награды</TabsTrigger>
             <TabsTrigger value="gallery">Галерея</TabsTrigger>
           </TabsList>
+
+          <TabsContent value="registrations" className="space-y-6">
+            <Card>
+              <CardHeader>
+                <CardTitle>Список регистраций</CardTitle>
+                <CardDescription>Управление пользователями и выдача роли администратора</CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                {registrations.length === 0 ? (
+                  <p className="text-muted-foreground text-center py-8">Регистраций пока нет</p>
+                ) : (
+                  <div className="space-y-3">
+                    {registrations.map((reg: any) => (
+                      <div key={reg.id} className="flex items-center justify-between border rounded-lg p-4">
+                        <div className="flex-1">
+                          <div className="flex items-center gap-3">
+                            <h3 className="font-semibold text-lg">
+                              {reg.first_name} {reg.last_name}
+                            </h3>
+                            {reg.is_admin && (
+                              <Badge variant="default">Администратор</Badge>
+                            )}
+                          </div>
+                          <p className="text-sm text-muted-foreground">ID: {reg.user_id}</p>
+                          <p className="text-xs text-muted-foreground">
+                            Зарегистрирован: {new Date(reg.created_at).toLocaleString('ru-RU')}
+                          </p>
+                        </div>
+                        <div className="flex items-center gap-3">
+                          <div className="flex items-center gap-2">
+                            <label className="text-sm font-medium">Админ</label>
+                            <Switch
+                              checked={reg.is_admin}
+                              onCheckedChange={async (checked) => {
+                                try {
+                                  const response = await fetch(`${REGISTER_API_URL}?id=${reg.id}`, {
+                                    method: 'PUT',
+                                    headers: { 'Content-Type': 'application/json' },
+                                    body: JSON.stringify({ is_admin: checked })
+                                  });
+                                  
+                                  if (response.ok) {
+                                    toast({
+                                      title: 'Успех',
+                                      description: checked ? 'Роль администратора выдана' : 'Роль администратора удалена'
+                                    });
+                                    fetchRegistrations();
+                                  } else {
+                                    toast({
+                                      title: 'Ошибка',
+                                      description: 'Не удалось изменить роль',
+                                      variant: 'destructive'
+                                    });
+                                  }
+                                } catch (error) {
+                                  toast({
+                                    title: 'Ошибка',
+                                    description: 'Проблема с подключением',
+                                    variant: 'destructive'
+                                  });
+                                }
+                              }}
+                            />
+                          </div>
+                          <Button
+                            variant="destructive"
+                            size="sm"
+                            onClick={async () => {
+                              try {
+                                const response = await fetch(`${REGISTER_API_URL}?id=${reg.id}`, {
+                                  method: 'DELETE'
+                                });
+                                
+                                if (response.ok) {
+                                  toast({ title: 'Успех', description: 'Регистрация удалена' });
+                                  fetchRegistrations();
+                                } else {
+                                  toast({
+                                    title: 'Ошибка',
+                                    description: 'Не удалось удалить',
+                                    variant: 'destructive'
+                                  });
+                                }
+                              } catch (error) {
+                                toast({
+                                  title: 'Ошибка',
+                                  description: 'Проблема с подключением',
+                                  variant: 'destructive'
+                                });
+                              }
+                            }}
+                          >
+                            <Icon name="Trash2" size={16} />
+                          </Button>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+          </TabsContent>
+
 
           <TabsContent value="news" className="space-y-6">
             <Card>

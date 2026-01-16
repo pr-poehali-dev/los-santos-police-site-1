@@ -13,7 +13,7 @@ def handler(event: dict, context) -> dict:
             'statusCode': 200,
             'headers': {
                 'Access-Control-Allow-Origin': '*',
-                'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
+                'Access-Control-Allow-Methods': 'GET, POST, PUT, DELETE, OPTIONS',
                 'Access-Control-Allow-Headers': 'Content-Type'
             },
             'body': '',
@@ -62,6 +62,75 @@ def handler(event: dict, context) -> dict:
                 'statusCode': 201,
                 'headers': {'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*'},
                 'body': json.dumps(dict(result), default=str),
+                'isBase64Encoded': False
+            }
+        
+        elif method == 'PUT':
+            params = event.get('queryStringParameters', {})
+            reg_id = params.get('id')
+            
+            if not reg_id:
+                return {
+                    'statusCode': 400,
+                    'headers': {'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*'},
+                    'body': json.dumps({'error': 'ID регистрации обязателен'}),
+                    'isBase64Encoded': False
+                }
+            
+            body = json.loads(event.get('body', '{}'))
+            is_admin = body.get('is_admin', False)
+            
+            cur.execute(
+                "UPDATE registrations SET is_admin = %s WHERE id = %s RETURNING *",
+                (is_admin, reg_id)
+            )
+            
+            conn.commit()
+            result = cur.fetchone()
+            
+            if not result:
+                return {
+                    'statusCode': 404,
+                    'headers': {'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*'},
+                    'body': json.dumps({'error': 'Регистрация не найдена'}),
+                    'isBase64Encoded': False
+                }
+            
+            return {
+                'statusCode': 200,
+                'headers': {'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*'},
+                'body': json.dumps(dict(result), default=str),
+                'isBase64Encoded': False
+            }
+        
+        elif method == 'DELETE':
+            params = event.get('queryStringParameters', {})
+            reg_id = params.get('id')
+            
+            if not reg_id:
+                return {
+                    'statusCode': 400,
+                    'headers': {'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*'},
+                    'body': json.dumps({'error': 'ID регистрации обязателен'}),
+                    'isBase64Encoded': False
+                }
+            
+            cur.execute("DELETE FROM registrations WHERE id = %s RETURNING *", (reg_id,))
+            conn.commit()
+            result = cur.fetchone()
+            
+            if not result:
+                return {
+                    'statusCode': 404,
+                    'headers': {'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*'},
+                    'body': json.dumps({'error': 'Регистрация не найдена'}),
+                    'isBase64Encoded': False
+                }
+            
+            return {
+                'statusCode': 200,
+                'headers': {'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*'},
+                'body': json.dumps({'message': 'Регистрация удалена'}),
                 'isBase64Encoded': False
             }
         

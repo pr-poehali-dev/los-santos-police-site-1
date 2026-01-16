@@ -6,14 +6,22 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import Icon from '@/components/ui/icon';
+import { useToast } from '@/hooks/use-toast';
 
 const API_URL = 'https://functions.poehali.dev/4718630c-6af3-4ca4-851c-1ea12eebe66e';
+const REGISTER_API_URL = 'https://functions.poehali.dev/31833d3b-7eea-4b55-a913-2666e686a0ac';
 
 export default function Index() {
+  const { toast } = useToast();
   const [activeSection, setActiveSection] = useState('home');
   const [news, setNews] = useState([]);
   const [achievements, setAchievements] = useState([]);
   const [gallery, setGallery] = useState([]);
+  const [registrationForm, setRegistrationForm] = useState({
+    first_name: '',
+    last_name: '',
+    user_id: ''
+  });
 
   const scrollToSection = (sectionId: string) => {
     setActiveSection(sectionId);
@@ -376,32 +384,73 @@ export default function Index() {
       <section id="contacts" className="py-16 px-4 bg-primary text-white">
         <div className="container mx-auto max-w-2xl">
           <h2 className="text-4xl font-heading font-bold mb-4 text-center">
-            Контакты
+            Регистрация
           </h2>
           <p className="text-center text-secondary mb-12">
-            Хотите присоединиться к LSPD? Заполните форму ниже
+            Хотите присоединиться к LSPD? Зарегистрируйтесь на сайте
           </p>
           <Card className="bg-white">
             <CardContent className="pt-6">
-              <form className="space-y-4">
+              <form className="space-y-4" onSubmit={async (e) => {
+                e.preventDefault();
+                try {
+                  const response = await fetch(REGISTER_API_URL, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(registrationForm)
+                  });
+                  
+                  if (response.ok) {
+                    toast({
+                      title: 'Успешно!',
+                      description: 'Вы зарегистрированы на сайте LSPD'
+                    });
+                    setRegistrationForm({ first_name: '', last_name: '', user_id: '' });
+                  } else {
+                    const error = await response.json();
+                    toast({
+                      title: 'Ошибка',
+                      description: error.error || 'Не удалось зарегистрироваться',
+                      variant: 'destructive'
+                    });
+                  }
+                } catch (error) {
+                  toast({
+                    title: 'Ошибка',
+                    description: 'Проблема с подключением к серверу',
+                    variant: 'destructive'
+                  });
+                }
+              }}>
                 <div>
-                  <label className="text-sm font-medium text-foreground mb-2 block">Ваше имя</label>
-                  <Input placeholder="Введите ваше имя в игре" />
+                  <label className="text-sm font-medium text-foreground mb-2 block">Имя</label>
+                  <Input
+                    value={registrationForm.first_name}
+                    onChange={(e) => setRegistrationForm({ ...registrationForm, first_name: e.target.value })}
+                    placeholder="Введите ваше имя"
+                    required
+                  />
                 </div>
                 <div>
-                  <label className="text-sm font-medium text-foreground mb-2 block">Discord</label>
-                  <Input placeholder="Ваш Discord" />
+                  <label className="text-sm font-medium text-foreground mb-2 block">Фамилия</label>
+                  <Input
+                    value={registrationForm.last_name}
+                    onChange={(e) => setRegistrationForm({ ...registrationForm, last_name: e.target.value })}
+                    placeholder="Введите вашу фамилию"
+                    required
+                  />
                 </div>
                 <div>
-                  <label className="text-sm font-medium text-foreground mb-2 block">Опыт игры</label>
-                  <Input placeholder="Сколько времени играете на сервере?" />
-                </div>
-                <div>
-                  <label className="text-sm font-medium text-foreground mb-2 block">Сообщение</label>
-                  <Textarea placeholder="Расскажите, почему хотите вступить в LSPD" rows={4} />
+                  <label className="text-sm font-medium text-foreground mb-2 block">ID</label>
+                  <Input
+                    value={registrationForm.user_id}
+                    onChange={(e) => setRegistrationForm({ ...registrationForm, user_id: e.target.value })}
+                    placeholder="Введите ваш игровой ID"
+                    required
+                  />
                 </div>
                 <Button type="submit" className="w-full" variant="default">
-                  Отправить заявку
+                  Зарегистрироваться
                 </Button>
               </form>
             </CardContent>
