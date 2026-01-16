@@ -16,17 +16,13 @@ export default function Index() {
     element?.scrollIntoView({ behavior: 'smooth' });
   };
 
-  const ranks = [
-    { title: 'Chief of Police', badge: '⭐⭐⭐⭐', level: 10, description: 'Высшее руководство департамента' },
-    { title: 'Deputy Chief', badge: '⭐⭐⭐', level: 9, description: 'Заместитель начальника полиции' },
-    { title: 'Captain', badge: '⭐⭐', level: 8, description: 'Командир подразделения' },
-    { title: 'Lieutenant', badge: '⭐', level: 7, description: 'Старший офицер' },
-    { title: 'Sergeant', badge: '🔷', level: 6, description: 'Сержант полиции' },
-    { title: 'Corporal', badge: '🔹', level: 5, description: 'Капрал полиции' },
-    { title: 'Officer III', badge: '🔸', level: 4, description: 'Офицер III класса' },
-    { title: 'Officer II', badge: '◽', level: 3, description: 'Офицер II класса' },
-    { title: 'Officer I', badge: '◾', level: 2, description: 'Офицер I класса' },
-    { title: 'Cadet', badge: '⬜', level: 1, description: 'Кадет академии' }
+  const departments = [
+    { title: 'Патрульная служба', icon: 'Car', description: 'Обеспечение порядка и безопасности на улицах города' },
+    { title: 'Отдел расследований', icon: 'Search', description: 'Раскрытие преступлений и проведение следственных мероприятий' },
+    { title: 'SWAT', icon: 'Shield', description: 'Спецподразделение для проведения тактических операций' },
+    { title: 'Дорожная полиция', icon: 'Construction', description: 'Контроль соблюдения правил дорожного движения' },
+    { title: 'Полицейская академия', icon: 'GraduationCap', description: 'Обучение и подготовка новых офицеров' },
+    { title: 'Отдел внутренних дел', icon: 'FileText', description: 'Контроль соблюдения дисциплины и порядка в департаменте' }
   ];
 
   const news = [
@@ -60,7 +56,7 @@ export default function Index() {
               <span className="text-xl font-heading font-bold text-white">LSPD</span>
             </div>
             <div className="hidden md:flex space-x-6">
-              {['home', 'about', 'ranks', 'rules', 'contacts', 'gallery'].map((section) => (
+              {['home', 'about', 'departments', 'rules', 'contacts', 'gallery'].map((section) => (
                 <button
                   key={section}
                   onClick={() => scrollToSection(section)}
@@ -70,7 +66,7 @@ export default function Index() {
                 >
                   {section === 'home' && 'Главная'}
                   {section === 'about' && 'О нас'}
-                  {section === 'ranks' && 'Ранги'}
+                  {section === 'departments' && 'Отделы'}
                   {section === 'rules' && 'Правила'}
                   {section === 'contacts' && 'Контакты'}
                   {section === 'gallery' && 'Галерея'}
@@ -212,21 +208,18 @@ export default function Index() {
         </div>
       </section>
 
-      <section id="ranks" className="py-16 px-4 bg-white">
+      <section id="departments" className="py-16 px-4 bg-white">
         <div className="container mx-auto">
           <h2 className="text-4xl font-heading font-bold text-primary mb-12 text-center">
-            Система Рангов
+            Отделы нашего доблестного департамента
           </h2>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {ranks.map((rank, index) => (
+            {departments.map((dept, index) => (
               <Card key={index} className="border-primary hover:shadow-xl transition-all hover:-translate-y-1">
                 <CardHeader>
-                  <div className="flex items-center justify-between mb-2">
-                    <span className="text-3xl">{rank.badge}</span>
-                    <Badge variant="secondary">Уровень {rank.level}</Badge>
-                  </div>
-                  <CardTitle className="font-heading text-xl">{rank.title}</CardTitle>
-                  <CardDescription>{rank.description}</CardDescription>
+                  <Icon name={dept.icon as any} className="text-primary mb-4" size={48} />
+                  <CardTitle className="font-heading text-xl">{dept.title}</CardTitle>
+                  <CardDescription>{dept.description}</CardDescription>
                 </CardHeader>
               </Card>
             ))}
