@@ -1,13 +1,13 @@
 import { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Input } from '@/components/ui/input';
-import { Textarea } from '@/components/ui/textarea';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Badge } from '@/components/ui/badge';
-import { Switch } from '@/components/ui/switch';
+import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import Icon from '@/components/ui/icon';
 import { useToast } from '@/hooks/use-toast';
+import SettingsTab from '@/components/admin/SettingsTab';
+import RegistrationsTab from '@/components/admin/RegistrationsTab';
+import NewsTab from '@/components/admin/NewsTab';
+import AchievementsTab from '@/components/admin/AchievementsTab';
+import GalleryTab from '@/components/admin/GalleryTab';
 
 const API_URL = 'https://functions.poehali.dev/4718630c-6af3-4ca4-851c-1ea12eebe66e';
 const REGISTER_API_URL = 'https://functions.poehali.dev/31833d3b-7eea-4b55-a913-2666e686a0ac';
@@ -179,351 +179,41 @@ export default function Admin() {
             <TabsTrigger value="gallery">Галерея</TabsTrigger>
           </TabsList>
 
-          <TabsContent value="settings" className="space-y-6">
-            <Card>
-              <CardHeader>
-                <CardTitle>Основные настройки сайта</CardTitle>
-                <CardDescription>Измените тексты на главной странице</CardDescription>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                <div>
-                  <label className="text-sm font-medium mb-2 block">Заголовок главной страницы</label>
-                  <Input
-                    value={settings.hero_title}
-                    onChange={(e) => setSettings({ ...settings, hero_title: e.target.value })}
-                    placeholder="Los Santos Police Department"
-                  />
-                </div>
-                <div>
-                  <label className="text-sm font-medium mb-2 block">Подзаголовок главной страницы</label>
-                  <Input
-                    value={settings.hero_subtitle}
-                    onChange={(e) => setSettings({ ...settings, hero_subtitle: e.target.value })}
-                    placeholder="Защищая и служа городу"
-                  />
-                </div>
-                <div>
-                  <label className="text-sm font-medium mb-2 block">Наша Миссия</label>
-                  <Textarea
-                    value={settings.about_mission}
-                    onChange={(e) => setSettings({ ...settings, about_mission: e.target.value })}
-                    placeholder="Описание миссии департамента"
-                    rows={4}
-                  />
-                </div>
-                <div>
-                  <label className="text-sm font-medium mb-2 block">История</label>
-                  <Textarea
-                    value={settings.about_history}
-                    onChange={(e) => setSettings({ ...settings, about_history: e.target.value })}
-                    placeholder="История департамента"
-                    rows={4}
-                  />
-                </div>
-                <Button onClick={updateSettings} className="w-full">
-                  Сохранить изменения
-                </Button>
-              </CardContent>
-            </Card>
-          </TabsContent>
+          <SettingsTab
+            settings={settings}
+            setSettings={setSettings}
+            updateSettings={updateSettings}
+          />
 
-          <TabsContent value="registrations" className="space-y-6">
-            <Card>
-              <CardHeader>
-                <CardTitle>Список регистраций</CardTitle>
-                <CardDescription>Управление пользователями и выдача роли администратора</CardDescription>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                {registrations.length === 0 ? (
-                  <p className="text-muted-foreground text-center py-8">Регистраций пока нет</p>
-                ) : (
-                  <div className="space-y-3">
-                    {registrations.map((reg: any) => (
-                      <div key={reg.id} className="flex items-center justify-between border rounded-lg p-4">
-                        <div className="flex-1">
-                          <div className="flex items-center gap-3">
-                            <h3 className="font-semibold text-lg">
-                              {reg.first_name} {reg.last_name}
-                            </h3>
-                            {reg.is_admin && (
-                              <Badge variant="default">Администратор</Badge>
-                            )}
-                          </div>
-                          <p className="text-sm text-muted-foreground">ID: {reg.user_id}</p>
-                          <p className="text-xs text-muted-foreground">
-                            Зарегистрирован: {new Date(reg.created_at).toLocaleString('ru-RU')}
-                          </p>
-                        </div>
-                        <div className="flex items-center gap-3">
-                          <div className="flex items-center gap-2">
-                            <label className="text-sm font-medium">Админ</label>
-                            <Switch
-                              checked={reg.is_admin}
-                              onCheckedChange={async (checked) => {
-                                try {
-                                  const response = await fetch(`${REGISTER_API_URL}?id=${reg.id}`, {
-                                    method: 'PUT',
-                                    headers: { 'Content-Type': 'application/json' },
-                                    body: JSON.stringify({ is_admin: checked })
-                                  });
-                                  
-                                  if (response.ok) {
-                                    toast({
-                                      title: 'Успех',
-                                      description: checked ? 'Роль администратора выдана' : 'Роль администратора удалена'
-                                    });
-                                    fetchRegistrations();
-                                  } else {
-                                    toast({
-                                      title: 'Ошибка',
-                                      description: 'Не удалось изменить роль',
-                                      variant: 'destructive'
-                                    });
-                                  }
-                                } catch (error) {
-                                  toast({
-                                    title: 'Ошибка',
-                                    description: 'Проблема с подключением',
-                                    variant: 'destructive'
-                                  });
-                                }
-                              }}
-                            />
-                          </div>
-                          <Button
-                            variant="destructive"
-                            size="sm"
-                            onClick={async () => {
-                              try {
-                                const response = await fetch(`${REGISTER_API_URL}?id=${reg.id}`, {
-                                  method: 'DELETE'
-                                });
-                                
-                                if (response.ok) {
-                                  toast({ title: 'Успех', description: 'Регистрация удалена' });
-                                  fetchRegistrations();
-                                } else {
-                                  toast({
-                                    title: 'Ошибка',
-                                    description: 'Не удалось удалить',
-                                    variant: 'destructive'
-                                  });
-                                }
-                              } catch (error) {
-                                toast({
-                                  title: 'Ошибка',
-                                  description: 'Проблема с подключением',
-                                  variant: 'destructive'
-                                });
-                              }
-                            }}
-                          >
-                            <Icon name="Trash2" size={16} />
-                          </Button>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                )}
-              </CardContent>
-            </Card>
-          </TabsContent>
+          <RegistrationsTab
+            registrations={registrations}
+            fetchRegistrations={fetchRegistrations}
+            registerApiUrl={REGISTER_API_URL}
+          />
 
+          <NewsTab
+            news={news}
+            newsForm={newsForm}
+            setNewsForm={setNewsForm}
+            addNews={addNews}
+            deleteItem={deleteItem}
+          />
 
-          <TabsContent value="news" className="space-y-6">
-            <Card>
-              <CardHeader>
-                <CardTitle>Добавить новость</CardTitle>
-                <CardDescription>Создайте новую запись для раздела новостей</CardDescription>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                <div>
-                  <label className="text-sm font-medium mb-2 block">Заголовок</label>
-                  <Input
-                    value={newsForm.title}
-                    onChange={(e) => setNewsForm({ ...newsForm, title: e.target.value })}
-                    placeholder="Введите заголовок новости"
-                  />
-                </div>
-                <div>
-                  <label className="text-sm font-medium mb-2 block">Категория</label>
-                  <Input
-                    value={newsForm.category}
-                    onChange={(e) => setNewsForm({ ...newsForm, category: e.target.value })}
-                    placeholder="Например: Операция, Академия"
-                  />
-                </div>
-                <div>
-                  <label className="text-sm font-medium mb-2 block">Дата (YYYY-MM-DD)</label>
-                  <Input
-                    type="date"
-                    value={newsForm.date}
-                    onChange={(e) => setNewsForm({ ...newsForm, date: e.target.value })}
-                  />
-                </div>
-                <Button onClick={addNews} className="w-full">
-                  Добавить новость
-                </Button>
-              </CardContent>
-            </Card>
+          <AchievementsTab
+            achievements={achievements}
+            achievementForm={achievementForm}
+            setAchievementForm={setAchievementForm}
+            addAchievement={addAchievement}
+            deleteItem={deleteItem}
+          />
 
-            <Card>
-              <CardHeader>
-                <CardTitle>Список новостей</CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-3">
-                {news.length === 0 ? (
-                  <p className="text-muted-foreground text-center py-4">Новостей пока нет</p>
-                ) : (
-                  news.map((item: any) => (
-                    <div key={item.id} className="flex items-start justify-between border-b pb-3">
-                      <div>
-                        <h3 className="font-semibold">{item.title}</h3>
-                        <p className="text-sm text-muted-foreground">{item.category} • {item.date}</p>
-                      </div>
-                      <Button
-                        variant="destructive"
-                        size="sm"
-                        onClick={() => deleteItem('news', item.id)}
-                      >
-                        <Icon name="Trash2" size={16} />
-                      </Button>
-                    </div>
-                  ))
-                )}
-              </CardContent>
-            </Card>
-          </TabsContent>
-
-          <TabsContent value="achievements" className="space-y-6">
-            <Card>
-              <CardHeader>
-                <CardTitle>Добавить награду</CardTitle>
-                <CardDescription>Создайте новую запись для раздела наград</CardDescription>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                <div>
-                  <label className="text-sm font-medium mb-2 block">Название награды</label>
-                  <Input
-                    value={achievementForm.title}
-                    onChange={(e) => setAchievementForm({ ...achievementForm, title: e.target.value })}
-                    placeholder="Например: Лучший офицер года"
-                  />
-                </div>
-                <div>
-                  <label className="text-sm font-medium mb-2 block">Получатель</label>
-                  <Input
-                    value={achievementForm.recipient}
-                    onChange={(e) => setAchievementForm({ ...achievementForm, recipient: e.target.value })}
-                    placeholder="Имя получателя"
-                  />
-                </div>
-                <div>
-                  <label className="text-sm font-medium mb-2 block">Год</label>
-                  <Input
-                    value={achievementForm.date}
-                    onChange={(e) => setAchievementForm({ ...achievementForm, date: e.target.value })}
-                    placeholder="2026"
-                  />
-                </div>
-                <Button onClick={addAchievement} className="w-full">
-                  Добавить награду
-                </Button>
-              </CardContent>
-            </Card>
-
-            <Card>
-              <CardHeader>
-                <CardTitle>Список наград</CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-3">
-                {achievements.length === 0 ? (
-                  <p className="text-muted-foreground text-center py-4">Наград пока нет</p>
-                ) : (
-                  achievements.map((item: any) => (
-                    <div key={item.id} className="flex items-start justify-between border-b pb-3">
-                      <div>
-                        <h3 className="font-semibold">{item.title}</h3>
-                        <p className="text-sm text-muted-foreground">{item.recipient} • {item.date}</p>
-                      </div>
-                      <Button
-                        variant="destructive"
-                        size="sm"
-                        onClick={() => deleteItem('achievements', item.id)}
-                      >
-                        <Icon name="Trash2" size={16} />
-                      </Button>
-                    </div>
-                  ))
-                )}
-              </CardContent>
-            </Card>
-          </TabsContent>
-
-          <TabsContent value="gallery" className="space-y-6">
-            <Card>
-              <CardHeader>
-                <CardTitle>Добавить изображение</CardTitle>
-                <CardDescription>Добавьте новое фото в галерею</CardDescription>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                <div>
-                  <label className="text-sm font-medium mb-2 block">URL изображения</label>
-                  <Input
-                    value={galleryForm.image_url}
-                    onChange={(e) => setGalleryForm({ ...galleryForm, image_url: e.target.value })}
-                    placeholder="https://..."
-                  />
-                </div>
-                <div>
-                  <label className="text-sm font-medium mb-2 block">Описание (опционально)</label>
-                  <Textarea
-                    value={galleryForm.caption}
-                    onChange={(e) => setGalleryForm({ ...galleryForm, caption: e.target.value })}
-                    placeholder="Краткое описание изображения"
-                    rows={2}
-                  />
-                </div>
-                <Button onClick={addGalleryItem} className="w-full">
-                  Добавить изображение
-                </Button>
-              </CardContent>
-            </Card>
-
-            <Card>
-              <CardHeader>
-                <CardTitle>Галерея</CardTitle>
-              </CardHeader>
-              <CardContent>
-                {gallery.length === 0 ? (
-                  <p className="text-muted-foreground text-center py-4">Изображений пока нет</p>
-                ) : (
-                  <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
-                    {gallery.map((item: any) => (
-                      <div key={item.id} className="relative group">
-                        <img
-                          src={item.image_url}
-                          alt={item.caption || 'Gallery image'}
-                          className="w-full h-40 object-cover rounded-lg"
-                        />
-                        <Button
-                          variant="destructive"
-                          size="sm"
-                          className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity"
-                          onClick={() => deleteItem('gallery', item.id)}
-                        >
-                          <Icon name="Trash2" size={16} />
-                        </Button>
-                        {item.caption && (
-                          <p className="text-xs text-muted-foreground mt-1">{item.caption}</p>
-                        )}
-                      </div>
-                    ))}
-                  </div>
-                )}
-              </CardContent>
-            </Card>
-          </TabsContent>
+          <GalleryTab
+            gallery={gallery}
+            galleryForm={galleryForm}
+            setGalleryForm={setGalleryForm}
+            addGalleryItem={addGalleryItem}
+            deleteItem={deleteItem}
+          />
         </Tabs>
       </div>
     </div>
