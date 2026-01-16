@@ -78,13 +78,44 @@ def handler(event: dict, context) -> dict:
                 }
             
             body = json.loads(event.get('body', '{}'))
-            is_admin = body.get('is_admin', False)
             
-            cur.execute(
-                "UPDATE registrations SET is_admin = %s WHERE id = %s RETURNING *",
-                (is_admin, reg_id)
-            )
+            update_fields = []
+            update_values = []
             
+            if 'is_admin' in body:
+                update_fields.append('is_admin = %s')
+                update_values.append(body['is_admin'])
+            
+            if 'first_name' in body:
+                first_name = body['first_name'].strip()
+                if first_name:
+                    update_fields.append('first_name = %s')
+                    update_values.append(first_name)
+            
+            if 'last_name' in body:
+                last_name = body['last_name'].strip()
+                if last_name:
+                    update_fields.append('last_name = %s')
+                    update_values.append(last_name)
+            
+            if 'user_id' in body:
+                user_id = body['user_id'].strip()
+                if user_id:
+                    update_fields.append('user_id = %s')
+                    update_values.append(user_id)
+            
+            if not update_fields:
+                return {
+                    'statusCode': 400,
+                    'headers': {'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*'},
+                    'body': json.dumps({'error': 'Нет полей для обновления'}),
+                    'isBase64Encoded': False
+                }
+            
+            update_values.append(reg_id)
+            sql = f"UPDATE registrations SET {', '.join(update_fields)} WHERE id = %s RETURNING *"
+            
+            cur.execute(sql, update_values)
             conn.commit()
             result = cur.fetchone()
             

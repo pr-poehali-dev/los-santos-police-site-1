@@ -3,6 +3,7 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
+import { Input } from '@/components/ui/input';
 import Icon from '@/components/ui/icon';
 import { useToast } from '@/hooks/use-toast';
 
@@ -12,29 +13,81 @@ export default function Profile() {
   const { toast } = useToast();
   const [userData, setUserData] = useState<any>(null);
   const [loading, setLoading] = useState(true);
+  const [isEditing, setIsEditing] = useState(false);
+  const [editForm, setEditForm] = useState({
+    first_name: '',
+    last_name: '',
+    user_id: ''
+  });
+
+  const fetchUserData = async () => {
+    try {
+      const response = await fetch(REGISTER_API_URL);
+      const data = await response.json();
+      
+      if (data.length > 0) {
+        setUserData(data[0]);
+        setEditForm({
+          first_name: data[0].first_name,
+          last_name: data[0].last_name,
+          user_id: data[0].user_id
+        });
+      }
+    } catch (error) {
+      toast({
+        title: 'Ошибка',
+        description: 'Не удалось загрузить данные профиля',
+        variant: 'destructive'
+      });
+    } finally {
+      setLoading(false);
+    }
+  };
 
   useEffect(() => {
-    const fetchUserData = async () => {
-      try {
-        const response = await fetch(REGISTER_API_URL);
-        const data = await response.json();
-        
-        if (data.length > 0) {
-          setUserData(data[0]);
-        }
-      } catch (error) {
-        toast({
-          title: 'Ошибка',
-          description: 'Не удалось загрузить данные профиля',
-          variant: 'destructive'
-        });
-      } finally {
-        setLoading(false);
-      }
-    };
-
     fetchUserData();
   }, []);
+
+  const handleSave = async () => {
+    try {
+      const response = await fetch(`${REGISTER_API_URL}?id=${userData.id}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(editForm)
+      });
+
+      if (response.ok) {
+        toast({
+          title: 'Успех',
+          description: 'Данные профиля обновлены'
+        });
+        setIsEditing(false);
+        await fetchUserData();
+      } else {
+        const error = await response.json();
+        toast({
+          title: 'Ошибка',
+          description: error.error || 'Не удалось обновить данные',
+          variant: 'destructive'
+        });
+      }
+    } catch (error) {
+      toast({
+        title: 'Ошибка',
+        description: 'Проблема с подключением к серверу',
+        variant: 'destructive'
+      });
+    }
+  };
+
+  const handleCancel = () => {
+    setEditForm({
+      first_name: userData.first_name,
+      last_name: userData.last_name,
+      user_id: userData.user_id
+    });
+    setIsEditing(false);
+  };
 
   if (loading) {
     return (
@@ -62,7 +115,7 @@ export default function Profile() {
     );
   }
 
-  const initials = `${userData.first_name?.[0] || ''}${userData.last_name?.[0] || ''}`;
+  const initials = `${editForm.first_name?.[0] || ''}${editForm.last_name?.[0] || ''}`;
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-slate-900 to-slate-800">
@@ -95,28 +148,47 @@ export default function Profile() {
         <div className="max-w-5xl mx-auto space-y-6">
           <Card className="border-secondary">
             <CardHeader className="bg-primary text-white">
-              <div className="flex items-center gap-6">
-                <Avatar className="w-24 h-24 border-4 border-secondary">
-                  <AvatarFallback className="text-3xl bg-secondary text-primary font-bold">
-                    {initials}
-                  </AvatarFallback>
-                </Avatar>
-                <div>
-                  <CardTitle className="text-3xl font-heading mb-2">
-                    {userData.first_name} {userData.last_name}
-                  </CardTitle>
-                  <div className="flex gap-2">
-                    <Badge variant="secondary" className="text-base">
-                      ID: {userData.user_id}
-                    </Badge>
-                    {userData.is_admin && (
-                      <Badge className="text-base bg-secondary text-primary">
-                        <Icon name="Star" size={16} className="mr-1" />
-                        Администратор
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-6">
+                  <Avatar className="w-24 h-24 border-4 border-secondary">
+                    <AvatarFallback className="text-3xl bg-secondary text-primary font-bold">
+                      {initials}
+                    </AvatarFallback>
+                  </Avatar>
+                  <div>
+                    <CardTitle className="text-3xl font-heading mb-2">
+                      {editForm.first_name} {editForm.last_name}
+                    </CardTitle>
+                    <div className="flex gap-2">
+                      <Badge variant="secondary" className="text-base">
+                        ID: {editForm.user_id}
                       </Badge>
-                    )}
+                      {userData.is_admin && (
+                        <Badge className="text-base bg-secondary text-primary">
+                          <Icon name="Star" size={16} className="mr-1" />
+                          Администратор
+                        </Badge>
+                      )}
+                    </div>
                   </div>
                 </div>
+                {!isEditing ? (
+                  <Button variant="secondary" onClick={() => setIsEditing(true)}>
+                    <Icon name="Edit" size={20} className="mr-2" />
+                    Редактировать
+                  </Button>
+                ) : (
+                  <div className="flex gap-2">
+                    <Button variant="secondary" onClick={handleSave}>
+                      <Icon name="Check" size={20} className="mr-2" />
+                      Сохранить
+                    </Button>
+                    <Button variant="outline" className="text-white border-white" onClick={handleCancel}>
+                      <Icon name="X" size={20} className="mr-2" />
+                      Отмена
+                    </Button>
+                  </div>
+                )}
               </div>
             </CardHeader>
           </Card>
@@ -130,18 +202,49 @@ export default function Profile() {
                 </CardTitle>
               </CardHeader>
               <CardContent className="space-y-4">
-                <div>
-                  <p className="text-sm text-muted-foreground">Имя</p>
-                  <p className="text-lg font-semibold">{userData.first_name}</p>
-                </div>
-                <div>
-                  <p className="text-sm text-muted-foreground">Фамилия</p>
-                  <p className="text-lg font-semibold">{userData.last_name}</p>
-                </div>
-                <div>
-                  <p className="text-sm text-muted-foreground">Игровой ID</p>
-                  <p className="text-lg font-semibold">{userData.user_id}</p>
-                </div>
+                {!isEditing ? (
+                  <>
+                    <div>
+                      <p className="text-sm text-muted-foreground">Имя</p>
+                      <p className="text-lg font-semibold">{userData.first_name}</p>
+                    </div>
+                    <div>
+                      <p className="text-sm text-muted-foreground">Фамилия</p>
+                      <p className="text-lg font-semibold">{userData.last_name}</p>
+                    </div>
+                    <div>
+                      <p className="text-sm text-muted-foreground">Игровой ID</p>
+                      <p className="text-lg font-semibold">{userData.user_id}</p>
+                    </div>
+                  </>
+                ) : (
+                  <>
+                    <div>
+                      <label className="text-sm font-medium mb-2 block">Имя</label>
+                      <Input
+                        value={editForm.first_name}
+                        onChange={(e) => setEditForm({ ...editForm, first_name: e.target.value })}
+                        placeholder="Введите имя"
+                      />
+                    </div>
+                    <div>
+                      <label className="text-sm font-medium mb-2 block">Фамилия</label>
+                      <Input
+                        value={editForm.last_name}
+                        onChange={(e) => setEditForm({ ...editForm, last_name: e.target.value })}
+                        placeholder="Введите фамилию"
+                      />
+                    </div>
+                    <div>
+                      <label className="text-sm font-medium mb-2 block">Игровой ID</label>
+                      <Input
+                        value={editForm.user_id}
+                        onChange={(e) => setEditForm({ ...editForm, user_id: e.target.value })}
+                        placeholder="Введите игровой ID"
+                      />
+                    </div>
+                  </>
+                )}
                 <div>
                   <p className="text-sm text-muted-foreground">Дата регистрации</p>
                   <p className="text-lg font-semibold">
